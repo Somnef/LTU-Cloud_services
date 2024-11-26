@@ -4,6 +4,7 @@
             <thead class="bg-gray-200 text-left">
                 <tr>
                     <th class="p-4 border-b">Name</th>
+                    <th class="p-4 border-b">Instance Type</th>
                     <th class="p-4 border-b">Instance ID</th>
                     <th class="p-4 border-b">State</th>
                     <th class="p-4 border-b">Availability Zone</th>
@@ -14,6 +15,7 @@
                 <tr v-for="instance in instances" :key="instance.InstanceId" class="hover:bg-gray-50">
 
                     <td class="p-4 border-b">{{ instance.Name }}</td>
+                    <td class="p-4 border-b">{{ instance.InstanceType }}</td>
                     <td class="p-4 border-b">{{ instance.InstanceId }}</td>
                     <td class="p-4 border-b font-medium" :class="{
                         'text-green-600': instance.State === 'running',

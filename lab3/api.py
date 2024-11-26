@@ -12,10 +12,10 @@ def create_client(service, region_name):
     return boto3.client(service, region_name=region_name)
 
 region = "eu-north-1"  # Update your region
-key_pair = "lab3-key"
-security_group = "sg-07fc8258ee8b3f718"
-instance_type = "t3.micro"
-ami_id = "ami-01c5beab73c20ddeb"
+# key_pair = "lab3-key"
+# security_group = "sg-07fc8258ee8b3f718"
+# instance_type = "t3.micro"
+# ami_id = "ami-01c5beab73c20ddeb"
 
 ec2_client = create_client("ec2", region)
 cloudwatch_client = create_client("cloudwatch", region)
@@ -36,6 +36,7 @@ def list_instances():
                     (tag["Value"] for tag in instance.get("Tags", []) if tag["Key"] == "Name"),
                     "No Name"
                 ),
+                "InstanceType": instance["InstanceType"],
                 "AvailabilityZone": instance["Placement"]["AvailabilityZone"],
             })
 
@@ -44,29 +45,38 @@ def list_instances():
 
     return jsonify({"Instances": instances})
 
-@app.route("/run-instance", methods=["POST"])
-def run_instance():
+@app.route("/create-instance", methods=["POST"])
+def create_instance():
     data = request.json
-    instance_count = data.get("count", 1)
+    instance_name = data["Name"]
+    instance_type = data["InstanceType"]
+    # ami_id = data["AmiId"]
+    # key_pair = data["KeyPair"]
+    # security_group = data["SecurityGroup"]
+    ami_id = "ami-01c5beab73c20ddeb"
+    key_pair = "lab3-key"
+    security_group = "sg-07fc8258ee8b3f718"
 
-    response = ec2_client.run_instances(
-        ImageId=ami_id,
-        InstanceType=instance_type,
-        KeyName=key_pair,
-        SecurityGroupIds=[security_group],
-        MinCount=1,
-        MaxCount=1,
-    )
+    # check instance type
+    if instance_type not in ["t3.micro"]:
+        instance_type = "t3.micro"
+
+    try:
+        response = ec2_client.run_instances(
+            ImageId=ami_id,
+            InstanceType=instance_type,
+            KeyName=key_pair,
+            SecurityGroupIds=[security_group],
+            MinCount=1,
+            MaxCount=1,
+        )
+    except Exception as e:
+        return jsonify({"Error": str(e)})
 
     instance_id = response["Instances"][0]["InstanceId"]
-    instance_name = f"Instance-{instance_count}"
+    ec2_client.create_tags(Resources=[instance_id], Tags=[{"Key": "Name", "Value": instance_name}])
 
-    ec2_client.create_tags(
-        Resources=[instance_id],
-        Tags=[{"Key": "Name", "Value": instance_name}],
-    )
-
-    return jsonify({"InstanceId": instance_id, "Name": instance_name, "State": "pending"})
+    return jsonify({"InstanceId": instance_id, "Action": "creating"})
 
 @app.route("/instance-status/<instance_id>", methods=["GET"])
 def get_instance_status(instance_id):
@@ -111,15 +121,14 @@ def get_instance_metrics(instance_id):
         )
 
         metrics_data.append({
-            "Metric": metric["Name"],
-            "Datapoints": [
-                {
-                    "Timestamp": datapoint["Timestamp"].isoformat(),
-                    "Average": datapoint.get("Average", "N/A"),
-                    "Maximum": datapoint.get("Maximum", "N/A"),
-                }
-                for datapoint in response["Datapoints"]
-            ]
+            "name": metric["Name"],
+            "data": {
+                "labels": [datapoint["Timestamp"].isoformat() for datapoint in response["Datapoints"]],
+                "datasets": [{
+                    "label": metric["Name"],
+                    "data": [datapoint["Average"] for datapoint in response["Datapoints"]],
+                }],
+            },
         })
 
     return jsonify({"InstanceId": instance_id, "Metrics": metrics_data})

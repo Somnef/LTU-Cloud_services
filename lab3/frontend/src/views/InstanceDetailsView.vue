@@ -1,6 +1,5 @@
 <template>
     <div>
-        Hello
         <EC2Details :id="id" />
     </div>
   </template>
