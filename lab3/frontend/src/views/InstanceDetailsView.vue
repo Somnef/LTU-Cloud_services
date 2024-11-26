@@ -1,6 +1,7 @@
 <template>
     <div>
-      <EC2Details :id="$route.params.id" />
+        Hello
+        <EC2Details :id="id" />
     </div>
   </template>
   
@@ -8,6 +9,12 @@
   import EC2Details from "@/components/EC2/EC2Details.vue";
   
   export default {
+    props: {
+        id: {
+            type: String,
+            required: true,
+        },
+    },
     components: { EC2Details },
   };
   </script>

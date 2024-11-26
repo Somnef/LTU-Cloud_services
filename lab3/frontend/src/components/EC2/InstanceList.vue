@@ -33,7 +33,7 @@
                             class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded shadow">
                             Stop
                         </button>
-                        <router-link :to="`/details/${instance.InstanceId}`" class="text-blue-500 hover:underline ml-4">
+                        <router-link :to="`/instance/${instance.InstanceId}`" class="text-blue-500 hover:underline ml-4">
                             View Details
                         </router-link>
                     </td>
