@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import { METRICS_API_URL } from "@/api";
 import axios from "axios";
 import {
   Chart as ChartJS,
@@ -59,7 +60,7 @@ export default {
                 if (!this.id) {
                     throw new Error("Instance ID is missing");
                 }
-                const response = await axios.get(`http://127.0.0.1:5000/instance-metrics/${this.id}`);
+                const response = await axios.get(METRICS_API_URL + "/instance-metrics/" + this.id);
                 
                 // add background color to data
                 this.instanceDetails = response.data;

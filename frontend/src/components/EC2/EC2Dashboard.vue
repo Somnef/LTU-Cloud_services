@@ -13,6 +13,7 @@
 <script>
 import axios from "axios";
 import InstanceList from "./InstanceList.vue";
+import { EC2_API_URL } from "@/api";
 
 export default {
     components: { InstanceList },
@@ -23,7 +24,7 @@ export default {
     },
     methods: {
         fetchInstances() {
-            axios.get("http://127.0.0.1:5000/instances")
+            axios.get(EC2_API_URL + "/instances")
                 .then((response) => {
                     this.instances = response.data.Instances; // Update instances data
                     // console.log("Instances refreshed:", this.instances);
@@ -41,7 +42,7 @@ export default {
                 return instance;
             });
 
-            axios.post("http://127.0.0.1:5000/start-instance/" + instanceId)
+            axios.post(EC2_API_URL + "/start-instance/" + instanceId)
                 .then(() => {
                     console.log("Instance ${instanceId} started successfully.");
                     this.fetchInstances(); // Refresh data after starting
@@ -50,7 +51,7 @@ export default {
         },
         stopInstance(instanceId) {
             console.log("Attempting to stop instance: ${instanceId}");
-            axios.post("http://127.0.0.1:5000/stop-instance/" + instanceId)
+            axios.post(EC2_API_URL + "/stop-instance/" + instanceId)
                 .then(() => {
                     console.log("Instance ${instanceId} stopped successfully.");
                     this.fetchInstances(); // Refresh data after stopping

@@ -20,6 +20,7 @@
 </template>
 
 <script>
+import { EC2_API_URL } from '@/api';
 import axios from 'axios';
 
 export default {
@@ -31,7 +32,7 @@ export default {
     },
     methods: {
         createInstance() {
-            axios.post('http://127.0.0.1:5000/create-instance', {
+            axios.post(EC2_API_URL + '/create-instance', {
                 Name: this.instanceName,
                 InstanceType: this.instanceType,
             }).then(() => {
